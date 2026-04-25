@@ -4,13 +4,21 @@ A lightweight Tauri desktop app for viewing local Codex token usage, session tre
 
 ## Screenshots
 
-### Dashboard
+### Dark Mode Dashboard
 
-![Codex Token Viewer dashboard](./docs/images/dashboard-view.png)
+<img src="./docs/images/app-screenshot.png" alt="Codex Token Viewer dark mode dashboard" width="30%" />
+
+### Light Mode Dashboard
+
+<img src="./docs/images/dashboard-view.png" alt="Codex Token Viewer light mode dashboard" width="30%" />
+
+### Dark Mode Settings Panel
+
+<img src="./docs/images/settings-dark-view.png" alt="Codex Token Viewer dark mode settings panel" width="30%" />
 
 ### Settings Panel
 
-![Codex Token Viewer settings panel](./docs/images/settings-view.png)
+<img src="./docs/images/settings-view.png" alt="Codex Token Viewer settings panel" width="30%" />
 
 Current release targets: Windows and macOS.
 
