@@ -2,7 +2,15 @@
 
 A lightweight Tauri desktop app for viewing local Codex token usage, session trends, and rate limit windows in real time.
 
-![Codex Token Viewer screenshot](./docs/images/app-screenshot.png)
+## Screenshots
+
+### Dashboard
+
+![Codex Token Viewer dashboard](./docs/images/dashboard-view.png)
+
+### Settings Panel
+
+![Codex Token Viewer settings panel](./docs/images/settings-view.png)
 
 Current release targets: Windows and macOS.
 
