@@ -14,6 +14,8 @@ use tauri::{
 };
 use tauri_plugin_autostart::MacosLauncher;
 
+mod relay_config;
+
 #[derive(Clone, Serialize)]
 struct TokenUsage {
     input_tokens: u64,
@@ -98,8 +100,12 @@ fn parse_event(line: &str) -> Option<UsageEvent> {
             .to_string(),
         primary: parse_rate_limit(rate_limits.get("primary")?)?,
         secondary: parse_rate_limit(rate_limits.get("secondary")?)?,
-        total_usage: info.and_then(|item| item.get("total_token_usage")).and_then(parse_usage),
-        last_usage: info.and_then(|item| item.get("last_token_usage")).and_then(parse_usage),
+        total_usage: info
+            .and_then(|item| item.get("total_token_usage"))
+            .and_then(parse_usage),
+        last_usage: info
+            .and_then(|item| item.get("last_token_usage"))
+            .and_then(parse_usage),
         model_context_window: info
             .and_then(|item| item.get("model_context_window"))
             .and_then(Value::as_u64),
@@ -258,6 +264,47 @@ fn quit_app(app: tauri::AppHandle) {
     app.exit(0);
 }
 
+#[tauri::command]
+fn load_relay_settings() -> Result<relay_config::RelaySettings, String> {
+    relay_config::load_relay_settings_from_default()
+}
+
+#[tauri::command]
+fn save_relay_settings(
+    settings: relay_config::RelaySettings,
+) -> Result<relay_config::RelaySettings, String> {
+    relay_config::save_relay_settings_to_default(settings)
+}
+
+#[tauri::command]
+fn apply_relay_config(
+    settings: relay_config::RelaySettings,
+) -> Result<relay_config::RelayApplyResult, String> {
+    relay_config::apply_relay_config_to_default(settings)
+}
+
+#[tauri::command]
+fn clear_relay_config() -> Result<relay_config::RelayApplyResult, String> {
+    relay_config::clear_relay_config_from_default()
+}
+
+#[tauri::command]
+fn relay_status() -> Result<relay_config::RelayStatus, String> {
+    relay_config::relay_status_from_default()
+}
+
+#[tauri::command]
+fn restart_codex_app() -> relay_config::RestartResult {
+    relay_config::restart_codex_app()
+}
+
+#[tauri::command]
+fn apply_relay_config_and_restart(
+    settings: relay_config::RelaySettings,
+) -> Result<relay_config::ApplyAndRestartResult, String> {
+    relay_config::apply_relay_config_and_restart_default(settings)
+}
+
 fn restore_main_window(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.set_skip_taskbar(false);
@@ -282,13 +329,14 @@ pub fn run() {
             }
         })
         .setup(|app| {
-            let show_item = MenuItem::with_id(app, "show", "Show Codex Token Viewer", true, None::<&str>)?;
+            let show_item =
+                MenuItem::with_id(app, "show", "Show Codex Toolkit", true, None::<&str>)?;
             let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let tray_menu = Menu::with_items(app, &[&show_item, &quit_item])?;
 
             let mut tray_builder = TrayIconBuilder::with_id("main-tray")
                 .menu(&tray_menu)
-                .tooltip("Codex Token Viewer")
+                .tooltip("Codex Toolkit")
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id().as_ref() {
                     "show" => restore_main_window(app),
@@ -327,7 +375,17 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![load_usage_snapshot, quit_app])
+        .invoke_handler(tauri::generate_handler![
+            load_usage_snapshot,
+            quit_app,
+            load_relay_settings,
+            save_relay_settings,
+            apply_relay_config,
+            clear_relay_config,
+            relay_status,
+            restart_codex_app,
+            apply_relay_config_and_restart
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

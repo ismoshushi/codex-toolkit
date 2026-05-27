@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Codex Token Viewer</title>
+    <title>Codex Toolkit</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -13,7 +13,7 @@
 
         <header class="topbar" data-tauri-drag-region>
           <div class="heading">
-            <h1>Codex Token Viewer</h1>
+            <h1>Codex Toolkit</h1>
             <p id="updated-at">Last refresh --</p>
           </div>
           <div class="actions">
@@ -59,8 +59,19 @@
         <section id="settings-panel" class="settings-panel is-hidden">
           <div class="settings-row">
             <div>
-              <strong>Autostart</strong>
-              <small>Launch the widget after sign-in.</small>
+              <strong data-i18n="languageTitle">Language</strong>
+              <small data-i18n="languageHint">Switch interface language.</small>
+            </div>
+            <div class="segmented-control" role="group" aria-label="Language">
+              <button id="language-en" type="button" class="segment" data-language="en">EN</button>
+              <button id="language-zh" type="button" class="segment" data-language="zh">中文</button>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <strong data-i18n="autostartTitle">Autostart</strong>
+              <small data-i18n="autostartHint">Launch the widget after sign-in.</small>
             </div>
             <label class="switch" for="autostart-toggle">
               <input id="autostart-toggle" type="checkbox" />
@@ -70,8 +81,8 @@
 
           <div class="settings-row">
             <div>
-              <strong>Snap to edges</strong>
-              <small>Snap when the widget is close to a screen edge.</small>
+              <strong data-i18n="snapTitle">Snap to edges</strong>
+              <small data-i18n="snapHint">Snap when the widget is close to a screen edge.</small>
             </div>
             <label class="switch" for="snap-toggle">
               <input id="snap-toggle" type="checkbox" />
@@ -80,7 +91,7 @@
           </div>
 
           <label class="settings-field" for="log-dir-input">
-            <span class="field-label">Codex session log directory</span>
+            <span class="field-label" data-i18n="logDirLabel">Codex session log directory</span>
             <input
               id="log-dir-input"
               class="text-input"
@@ -92,27 +103,106 @@
 
           <div class="settings-grid">
             <label class="settings-field" for="refresh-interval-select">
-              <span class="field-label">Auto refresh</span>
+              <span class="field-label" data-i18n="refreshLabel">Auto refresh</span>
               <select id="refresh-interval-select" class="select-input">
-                <option value="15000">15 seconds</option>
-                <option value="30000">30 seconds</option>
-                <option value="45000">45 seconds</option>
-                <option value="60000">60 seconds</option>
-                <option value="0">Manual only</option>
+                <option value="15000" data-i18n="refresh15">15 seconds</option>
+                <option value="30000" data-i18n="refresh30">30 seconds</option>
+                <option value="45000" data-i18n="refresh45">45 seconds</option>
+                <option value="60000" data-i18n="refresh60">60 seconds</option>
+                <option value="0" data-i18n="refreshManual">Manual only</option>
               </select>
             </label>
 
             <label class="settings-field" for="summary-mode-select">
-              <span class="field-label">Main token card</span>
+              <span class="field-label" data-i18n="summaryModeLabel">Main token card</span>
               <select id="summary-mode-select" class="select-input">
-                <option value="session">Current session</option>
-                <option value="last">Last response</option>
+                <option value="session" data-i18n="summarySession">Current session</option>
+                <option value="last" data-i18n="summaryLast">Last response</option>
               </select>
             </label>
           </div>
 
+          <section class="api-switcher" aria-label="Relay manager">
+            <div class="api-switcher-head">
+              <div>
+                <strong data-i18n="relayTitle">Relay manager</strong>
+                <small id="relay-route-status">Official endpoint</small>
+              </div>
+              <label class="switch" for="relay-enabled-toggle">
+                <input id="relay-enabled-toggle" type="checkbox" />
+                <span></span>
+              </label>
+            </div>
+
+            <label class="settings-field" for="relay-provider-id-input">
+              <span class="field-label" data-i18n="providerIdLabel">Provider ID</span>
+              <input
+                id="relay-provider-id-input"
+                class="text-input"
+                type="text"
+                placeholder="moapi"
+                spellcheck="false"
+              />
+            </label>
+
+            <label class="settings-field" for="relay-base-url-input">
+              <span class="field-label" data-i18n="baseUrlLabel">API Base URL</span>
+              <input
+                id="relay-base-url-input"
+                class="text-input"
+                type="url"
+                placeholder="https://your-relay.example.com/v1"
+                spellcheck="false"
+              />
+            </label>
+
+            <label class="settings-field" for="relay-api-key-input">
+              <span class="field-label" data-i18n="apiKeyLabel">API Key</span>
+              <span class="key-input-row">
+                <input
+                  id="relay-api-key-input"
+                  class="text-input"
+                  type="password"
+                  placeholder="sk-..."
+                  spellcheck="false"
+                />
+                <button id="relay-key-visibility" class="mini-btn" type="button" data-i18n="show">Show</button>
+              </span>
+            </label>
+
+            <label class="settings-field" for="relay-test-model-input">
+              <span class="field-label" data-i18n="testModelLabel">Test model</span>
+              <input
+                id="relay-test-model-input"
+                class="text-input"
+                type="text"
+                placeholder="gpt-5-mini"
+                spellcheck="false"
+              />
+            </label>
+
+            <div class="relay-status-grid" aria-live="polite">
+              <span data-i18n="route">Route</span>
+              <strong id="relay-status-route">--</strong>
+              <span data-i18n="config">Config</span>
+              <strong id="relay-status-config">--</strong>
+              <span data-i18n="codex">Codex</span>
+              <strong id="relay-status-codex">--</strong>
+              <span data-i18n="lastApply">Last apply</span>
+              <strong id="relay-last-apply">--</strong>
+            </div>
+
+            <div class="relay-actions">
+              <button id="relay-clear-btn" class="relay-btn relay-btn-danger relay-btn-wide" type="button" data-i18n="restoreOfficial">Restore official</button>
+              <button id="relay-apply-btn" class="relay-btn" type="button" data-i18n="applyToCodex">Apply to Codex</button>
+              <button id="relay-restart-btn" class="relay-btn relay-btn-primary" type="button" data-i18n="applyRestart">Apply & Restart Codex</button>
+            </div>
+
+            <small id="relay-action-status" class="relay-action-status" data-i18n="ready">Ready</small>
+          </section>
+
           <p class="settings-note">
-            Source is local Codex session logs. This is not the OpenAI API Usage endpoint and not a remote ChatGPT Plus dashboard.
+            <span data-i18n="settingsNote">Source is local Codex session logs. This is not the OpenAI API Usage endpoint and not a remote ChatGPT Plus dashboard.</span>
           </p>
 
           <div class="settings-meta">
@@ -123,12 +213,12 @@
 
         <div class="content-scroll">
           <section class="section section-bars">
-            <h2>24 Hour Trend</h2>
+            <h2 data-i18n="trend24">24 Hour Trend</h2>
             <div id="daily-bars" class="bar-row" aria-label="24 hour trend"></div>
           </section>
 
           <section class="section section-line">
-            <h2>7 Day Trend</h2>
+            <h2 data-i18n="trend7">7 Day Trend</h2>
             <div class="line-card">
               <svg viewBox="0 0 280 88" class="trend-line" aria-hidden="true">
                 <path
@@ -171,7 +261,7 @@
           <section class="stats">
             <article class="stat-card stat-card-primary">
               <strong id="primary-percent">--</strong>
-              <span>5 Hour Window</span>
+              <span data-i18n="fiveHourWindow">5 Hour Window</span>
               <small id="primary-meta">Resets --</small>
               <div class="meter" aria-hidden="true">
                 <span id="primary-meter-fill" class="meter-fill"></span>
@@ -180,7 +270,7 @@
             </article>
             <article class="stat-card stat-card-secondary">
               <strong id="secondary-percent">--</strong>
-              <span>Weekly Window</span>
+              <span data-i18n="weeklyWindow">Weekly Window</span>
               <small id="secondary-meta">Resets --</small>
               <div class="meter" aria-hidden="true">
                 <span id="secondary-meter-fill" class="meter-fill"></span>
@@ -195,26 +285,26 @@
               <strong id="total-tokens">--</strong>
             </article>
             <article class="usage-chip">
-              <span class="usage-label">Last response tokens</span>
+              <span class="usage-label" data-i18n="lastResponseTokens">Last response tokens</span>
               <strong id="last-tokens">--</strong>
             </article>
             <article class="usage-chip usage-chip-wide">
-              <span class="usage-label">Last usage event</span>
+              <span class="usage-label" data-i18n="lastUsageEvent">Last usage event</span>
               <strong id="sync-time">--</strong>
             </article>
             <article class="usage-chip">
-              <span class="usage-label">Context window</span>
+              <span class="usage-label" data-i18n="contextWindow">Context window</span>
               <strong id="context-window">--</strong>
             </article>
             <article class="usage-chip">
-              <span class="usage-label">Scanned files</span>
+              <span class="usage-label" data-i18n="scannedFiles">Scanned files</span>
               <strong id="scanned-files">--</strong>
             </article>
           </section>
 
           <section class="details-toggle-row">
             <button id="details-toggle" class="details-toggle" type="button" aria-expanded="false">
-              <span>Detailed token usage</span>
+              <span data-i18n="detailedTokenUsage">Detailed token usage</span>
               <span id="details-toggle-icon" aria-hidden="true">+</span>
             </button>
           </section>
@@ -222,24 +312,24 @@
           <section id="token-breakdown" class="token-breakdown is-collapsed" aria-label="Detailed token usage">
             <div class="breakdown-block">
               <div class="breakdown-head">
-                <h3>Session Totals</h3>
+                <h3 data-i18n="sessionTotals">Session Totals</h3>
                 <span id="total-window-label">Current session total</span>
               </div>
               <div class="breakdown-grid">
                 <article class="metric">
-                  <span class="metric-label">Input</span>
+                  <span class="metric-label" data-i18n="input">Input</span>
                   <strong id="total-input">--</strong>
                 </article>
                 <article class="metric">
-                  <span class="metric-label">Output</span>
+                  <span class="metric-label" data-i18n="output">Output</span>
                   <strong id="total-output">--</strong>
                 </article>
                 <article class="metric">
-                  <span class="metric-label">Cached</span>
+                  <span class="metric-label" data-i18n="cached">Cached</span>
                   <strong id="total-cached">--</strong>
                 </article>
                 <article class="metric">
-                  <span class="metric-label">Reasoning</span>
+                  <span class="metric-label" data-i18n="reasoning">Reasoning</span>
                   <strong id="total-reasoning">--</strong>
                 </article>
               </div>
@@ -247,24 +337,24 @@
 
             <div class="breakdown-block">
               <div class="breakdown-head">
-                <h3>Last Response</h3>
+                <h3 data-i18n="lastResponse">Last Response</h3>
                 <span id="last-window-label">Most recent response</span>
               </div>
               <div class="breakdown-grid">
                 <article class="metric">
-                  <span class="metric-label">Input</span>
+                  <span class="metric-label" data-i18n="input">Input</span>
                   <strong id="last-input">--</strong>
                 </article>
                 <article class="metric">
-                  <span class="metric-label">Output</span>
+                  <span class="metric-label" data-i18n="output">Output</span>
                   <strong id="last-output">--</strong>
                 </article>
                 <article class="metric">
-                  <span class="metric-label">Cached</span>
+                  <span class="metric-label" data-i18n="cached">Cached</span>
                   <strong id="last-cached">--</strong>
                 </article>
                 <article class="metric">
-                  <span class="metric-label">Reasoning</span>
+                  <span class="metric-label" data-i18n="reasoning">Reasoning</span>
                   <strong id="last-reasoning">--</strong>
                 </article>
               </div>
@@ -276,12 +366,12 @@
           <label class="toggle-row" for="theme-toggle">
             <input id="theme-toggle" type="checkbox" />
             <span class="toggle"></span>
-            <span>Day/Night</span>
+            <span data-i18n="dayNight">Day/Night</span>
           </label>
 
           <button id="quit-btn" class="quit-btn" type="button">
             <span class="quit-mark" aria-hidden="true">x</span>
-            <span>Quit</span>
+            <span data-i18n="quit">Quit</span>
           </button>
         </footer>
 

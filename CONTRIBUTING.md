@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Codex Token Viewer.
+Thanks for helping improve Codex Toolkit.
 
 ## Before You Start
 

@@ -18,9 +18,25 @@ const themeToggle = document.getElementById('theme-toggle');
 const themeToggleRow = document.querySelector('.toggle-row');
 const snapToggle = document.getElementById('snap-toggle');
 const autostartToggle = document.getElementById('autostart-toggle');
+const languageButtons = document.querySelectorAll('[data-language]');
 const logDirInput = document.getElementById('log-dir-input');
 const refreshIntervalSelect = document.getElementById('refresh-interval-select');
 const summaryModeSelect = document.getElementById('summary-mode-select');
+const relayEnabledToggle = document.getElementById('relay-enabled-toggle');
+const relayRouteStatus = document.getElementById('relay-route-status');
+const relayProviderIdInput = document.getElementById('relay-provider-id-input');
+const relayBaseUrlInput = document.getElementById('relay-base-url-input');
+const relayApiKeyInput = document.getElementById('relay-api-key-input');
+const relayKeyVisibility = document.getElementById('relay-key-visibility');
+const relayTestModelInput = document.getElementById('relay-test-model-input');
+const relayStatusRoute = document.getElementById('relay-status-route');
+const relayStatusConfig = document.getElementById('relay-status-config');
+const relayStatusCodex = document.getElementById('relay-status-codex');
+const relayLastApply = document.getElementById('relay-last-apply');
+const relayActionStatus = document.getElementById('relay-action-status');
+const relayApplyBtn = document.getElementById('relay-apply-btn');
+const relayRestartBtn = document.getElementById('relay-restart-btn');
+const relayClearBtn = document.getElementById('relay-clear-btn');
 const quitBtn = document.getElementById('quit-btn');
 const detailsToggle = document.getElementById('details-toggle');
 const detailsToggleIcon = document.getElementById('details-toggle-icon');
@@ -62,6 +78,8 @@ const LOG_DIR_STORAGE_KEY = 'codexviewer:log-dir';
 const REFRESH_INTERVAL_STORAGE_KEY = 'codexviewer:refresh-interval';
 const SUMMARY_MODE_STORAGE_KEY = 'codexviewer:summary-mode';
 const PRIVACY_MODE_STORAGE_KEY = 'codexviewer:privacy-mode';
+const LANGUAGE_STORAGE_KEY = 'codexviewer:language';
+const RELAY_LAST_APPLY_STORAGE_KEY = 'codexviewer:relay-last-apply';
 const SNAP_THRESHOLD = 24;
 const COLLAPSED_HEIGHT = 496;
 const EXPANDED_HEIGHT = 650;
@@ -70,6 +88,271 @@ let isSnapping = false;
 let currentWindowHeight = COLLAPSED_HEIGHT;
 let refreshTimer = null;
 let sourcePathRaw = 'Local Codex session logs';
+let currentRelayStatus = null;
+let currentLanguage = 'en';
+
+const I18N = {
+  en: {
+    waiting: 'Waiting',
+    refresh: 'Refresh',
+    settings: 'Settings',
+    togglePrivacy: 'Toggle privacy mode',
+    showFullPath: 'Show full path',
+    hideFullPath: 'Hide full path',
+    localLogs: 'Local Codex session logs',
+    hiddenPath: 'Hidden path',
+    languageTitle: 'Language',
+    languageHint: 'Switch interface language.',
+    autostartTitle: 'Autostart',
+    autostartHint: 'Launch the widget after sign-in.',
+    snapTitle: 'Snap to edges',
+    snapHint: 'Snap when the widget is close to a screen edge.',
+    logDirLabel: 'Codex session log directory',
+    refreshLabel: 'Auto refresh',
+    refresh15: '15 seconds',
+    refresh30: '30 seconds',
+    refresh45: '45 seconds',
+    refresh60: '60 seconds',
+    refreshManual: 'Manual only',
+    summaryModeLabel: 'Main token card',
+    summarySession: 'Current session',
+    summaryLast: 'Last response',
+    relayTitle: 'Relay manager',
+    officialEndpoint: 'Official endpoint',
+    relayNotConfigured: 'Relay not configured',
+    relayActive: 'Relay active',
+    providerIdLabel: 'Provider ID',
+    baseUrlLabel: 'API Base URL',
+    apiKeyLabel: 'API Key',
+    show: 'Show',
+    hide: 'Hide',
+    testModelLabel: 'Test model',
+    route: 'Route',
+    config: 'Config',
+    codex: 'Codex',
+    lastApply: 'Last apply',
+    save: 'Save',
+    applyToCodex: 'Apply to Codex',
+    applyRestart: 'Apply & Restart Codex',
+    restoreOfficial: 'Restore official',
+    ready: 'Ready',
+    settingsNote: 'Source is local Codex session logs. This is not the OpenAI API Usage endpoint and not a remote ChatGPT Plus dashboard.',
+    sourcePrefix: 'Source',
+    planPrefix: 'Plan',
+    trend24: '24 Hour Trend',
+    trend7: '7 Day Trend',
+    fiveHourWindow: '5 Hour Window',
+    weeklyWindow: 'Weekly Window',
+    currentSessionTokens: 'Current session tokens',
+    lastResponseTokens: 'Last response tokens',
+    lastUsageEvent: 'Last usage event',
+    contextWindow: 'Context window',
+    scannedFiles: 'Scanned files',
+    detailedTokenUsage: 'Detailed token usage',
+    sessionTotals: 'Session Totals',
+    currentSessionTotal: 'Current session total',
+    mostRecentResponse: 'Most recent response',
+    lastResponse: 'Last Response',
+    input: 'Input',
+    output: 'Output',
+    cached: 'Cached',
+    reasoning: 'Reasoning',
+    remaining: 'Remaining',
+    used: 'Used',
+    resets: 'resets',
+    inThisWindow: 'in this',
+    thisWeek: 'this week',
+    total: 'Total',
+    dayNight: 'Day/Night',
+    quit: 'Quit',
+    connected: 'Connected',
+    reading: 'Reading',
+    readFailed: 'Read failed',
+    scanningLogs: 'Scanning ~/.codex/sessions',
+    readingLogs: 'Reading local usage logs...',
+    justNow: 'just now',
+    minutesAgo: (value) => `${value}m ago`,
+    hoursAgo: (value) => `${value}h ago`,
+    daysAgo: (value) => `${value}d ago`,
+    lastRefresh: (refresh, event) => `Last refresh ${refresh} | event ${event}`,
+    eventsFromFiles: (events, files) => `${events} events from ${files} files`,
+    tokensFromEvents: (route, events, files) => `${route} tokens | ${events} events from ${files} files`,
+    tokenLogs: (route, source) => `${route} token logs | ${source}`,
+    relayTokenLogs: (route, baseUrl, source) => `${route} token logs via ${baseUrl} | ${source}`,
+    sessionTokens: (route) => `${route} session tokens`,
+    responseTokens: (route) => `${route} response tokens`,
+    remainingWindow: (remaining, hours) => `Remaining ${remaining}% in this ${hours}h window`,
+    remainingWeek: (remaining) => `Remaining ${remaining}% this week`,
+    saving: 'Saving...',
+    relaySaved: 'Relay settings saved.',
+    applyingRelay: 'Applying relay config...',
+    applyingRestart: 'Applying and restarting Codex...',
+    restoringOfficial: 'Restoring official endpoint...',
+    configured: 'Configured',
+    notApplied: 'Not applied',
+    running: 'Running',
+    notRunning: 'Not running',
+    relayDisabledError: 'Relay is disabled.',
+    emptyBaseUrlError: 'API Base URL cannot be empty.',
+    invalidBaseUrlError: 'API Base URL must start with http:// or https://.',
+    emptyApiKeyError: 'API Key cannot be empty.',
+    invalidProviderIdError: 'Provider ID can only contain letters, numbers, underscore and hyphen.',
+    relayConfiguredFallback: 'configured relay',
+    official: 'Official',
+    relay: 'Relay'
+  },
+  zh: {
+    waiting: '等待',
+    refresh: '刷新',
+    settings: '设置',
+    togglePrivacy: '切换隐私模式',
+    showFullPath: '显示完整路径',
+    hideFullPath: '隐藏完整路径',
+    localLogs: '本地 Codex 会话日志',
+    hiddenPath: '路径已隐藏',
+    languageTitle: '语言',
+    languageHint: '切换界面语言。',
+    autostartTitle: '开机启动',
+    autostartHint: '登录系统后自动启动小组件。',
+    snapTitle: '贴边吸附',
+    snapHint: '窗口靠近屏幕边缘时自动吸附。',
+    logDirLabel: 'Codex 会话日志目录',
+    refreshLabel: '自动刷新',
+    refresh15: '15 秒',
+    refresh30: '30 秒',
+    refresh45: '45 秒',
+    refresh60: '60 秒',
+    refreshManual: '仅手动',
+    summaryModeLabel: '主 token 卡片',
+    summarySession: '当前会话',
+    summaryLast: '最近回复',
+    relayTitle: '中转站管理',
+    officialEndpoint: '官方端点',
+    relayNotConfigured: '中转站未配置',
+    relayActive: '中转站已启用',
+    providerIdLabel: 'Provider ID',
+    baseUrlLabel: 'API Base URL',
+    apiKeyLabel: 'API Key',
+    show: '显示',
+    hide: '隐藏',
+    testModelLabel: '测试模型',
+    route: '路由',
+    config: '配置',
+    codex: 'Codex',
+    lastApply: '最后应用',
+    save: '保存',
+    applyToCodex: '应用到 Codex',
+    applyRestart: '应用并重启 Codex',
+    restoreOfficial: '恢复官方端点',
+    ready: '就绪',
+    settingsNote: '来源是本地 Codex 会话日志，不是 OpenAI API Usage 接口，也不是远程 ChatGPT Plus 仪表盘。',
+    sourcePrefix: '来源',
+    planPrefix: '套餐',
+    trend24: '24 小时趋势',
+    trend7: '7 天趋势',
+    fiveHourWindow: '5 小时窗口',
+    weeklyWindow: '每周窗口',
+    currentSessionTokens: '当前会话 token',
+    lastResponseTokens: '最近回复 token',
+    lastUsageEvent: '最近使用事件',
+    contextWindow: '上下文窗口',
+    scannedFiles: '扫描文件',
+    detailedTokenUsage: '详细 token 用量',
+    sessionTotals: '会话总计',
+    currentSessionTotal: '当前会话总计',
+    mostRecentResponse: '最近一次回复',
+    lastResponse: '最近回复',
+    input: '输入',
+    output: '输出',
+    cached: '缓存',
+    reasoning: '推理',
+    remaining: '剩余',
+    used: '已用',
+    resets: '重置',
+    inThisWindow: '在当前',
+    thisWeek: '本周',
+    total: '总计',
+    dayNight: '日间/夜间',
+    quit: '退出',
+    connected: '已连接',
+    reading: '读取中',
+    readFailed: '读取失败',
+    scanningLogs: '扫描 ~/.codex/sessions',
+    readingLogs: '正在读取本地用量日志...',
+    justNow: '刚刚',
+    minutesAgo: (value) => `${value} 分钟前`,
+    hoursAgo: (value) => `${value} 小时前`,
+    daysAgo: (value) => `${value} 天前`,
+    lastRefresh: (refresh, event) => `刷新 ${refresh} | 事件 ${event}`,
+    eventsFromFiles: (events, files) => `${events} 个事件，来自 ${files} 个文件`,
+    tokensFromEvents: (route, events, files) => `${route} token | ${events} 个事件，来自 ${files} 个文件`,
+    tokenLogs: (route, source) => `${route} token 日志 | ${source}`,
+    relayTokenLogs: (route, baseUrl, source) => `${route} token 日志，经由 ${baseUrl} | ${source}`,
+    sessionTokens: (route) => `${route} 会话 token`,
+    responseTokens: (route) => `${route} 回复 token`,
+    remainingWindow: (remaining, hours) => `剩余 ${remaining}%，当前 ${hours} 小时窗口`,
+    remainingWeek: (remaining) => `本周剩余 ${remaining}%`,
+    saving: '保存中...',
+    relaySaved: '中转站设置已保存。',
+    applyingRelay: '正在应用中转站配置...',
+    applyingRestart: '正在应用并重启 Codex...',
+    restoringOfficial: '正在恢复官方端点...',
+    configured: '已配置',
+    notApplied: '未应用',
+    running: '运行中',
+    notRunning: '未运行',
+    relayDisabledError: '中转站未启用。',
+    emptyBaseUrlError: 'API Base URL 不能为空。',
+    invalidBaseUrlError: 'API Base URL 必须以 http:// 或 https:// 开头。',
+    emptyApiKeyError: 'API Key 不能为空。',
+    invalidProviderIdError: 'Provider ID 只能包含英文、数字、下划线和连字符。',
+    relayConfiguredFallback: '已配置中转站',
+    official: '官方',
+    relay: '中转站'
+  }
+};
+
+function t(key, ...args) {
+  const value = I18N[currentLanguage]?.[key] ?? I18N.en[key] ?? key;
+  return typeof value === 'function' ? value(...args) : value;
+}
+
+function getInitialLanguage() {
+  const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  if (saved === 'en' || saved === 'zh') {
+    return saved;
+  }
+  return navigator.language?.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+}
+
+function applyLanguage(language) {
+  currentLanguage = language === 'zh' ? 'zh' : 'en';
+  document.documentElement.lang = currentLanguage === 'zh' ? 'zh-CN' : 'en';
+  localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage);
+
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    element.textContent = t(element.dataset.i18n);
+  });
+
+  languageButtons.forEach((button) => {
+    const isActive = button.dataset.language === currentLanguage;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+
+  refreshBtn.setAttribute('aria-label', t('refresh'));
+  settingsBtn.setAttribute('aria-label', t('settings'));
+  logDirInput.placeholder = 'Default: ~/.codex/sessions';
+  privacyToggle.setAttribute('aria-label', t('togglePrivacy'));
+  privacyToggle.title = t('togglePrivacy');
+  relayActionStatus.textContent = relayActionStatus.textContent === 'Ready' ? t('ready') : relayActionStatus.textContent;
+  renderSummaryTokenLabel();
+  renderSourcePath();
+  syncRelayEnabledState();
+  if (currentRelayStatus) {
+    renderRelayStatus(currentRelayStatus);
+  }
+}
 
 async function isAutostartEnabled() {
   return invoke('plugin:autostart|is_enabled');
@@ -84,7 +367,7 @@ async function disableAutostart() {
 }
 
 function formatTime(date) {
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat(currentLanguage === 'zh' ? 'zh-CN' : 'en-US', {
     hour: 'numeric',
     minute: '2-digit',
     second: '2-digit',
@@ -97,7 +380,7 @@ function formatReset(unixSeconds) {
     return '--';
   }
 
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat(currentLanguage === 'zh' ? 'zh-CN' : 'en-US', {
     month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
@@ -145,20 +428,20 @@ function formatRelativeTime(date) {
 
   const diffMinutes = Math.max(0, Math.round(diffMs / 60000));
   if (diffMinutes < 1) {
-    return 'just now';
+    return t('justNow');
   }
 
   if (diffMinutes < 60) {
-    return `${diffMinutes}m ago`;
+    return t('minutesAgo', diffMinutes);
   }
 
   const diffHours = Math.round(diffMinutes / 60);
   if (diffHours < 24) {
-    return `${diffHours}h ago`;
+    return t('hoursAgo', diffHours);
   }
 
   const diffDays = Math.round(diffHours / 24);
-  return `${diffDays}d ago`;
+  return t('daysAgo', diffDays);
 }
 
 function clampPercent(value) {
@@ -250,8 +533,28 @@ function getSummaryMode() {
 
 function applySummaryMode(mode) {
   summaryModeSelect.value = mode;
-  summaryTokensLabel.textContent = mode === 'last' ? 'Last response tokens' : 'Current session tokens';
+  renderSummaryTokenLabel();
   localStorage.setItem(SUMMARY_MODE_STORAGE_KEY, mode);
+}
+
+function getUsageRouteLabel() {
+  return currentRelayStatus?.route === 'relay' ? t('relay') : t('official');
+}
+
+function getUsageSourceDetail(snapshot) {
+  const routeLabel = getUsageRouteLabel();
+  const source = snapshot?.source_label || 'Local Codex session logs';
+  if (currentRelayStatus?.route === 'relay') {
+    const baseUrl = currentRelayStatus.baseUrl || currentRelayStatus.base_url || t('relayConfiguredFallback');
+    return t('relayTokenLogs', routeLabel, baseUrl, source);
+  }
+  return t('tokenLogs', routeLabel, source);
+}
+
+function renderSummaryTokenLabel() {
+  const mode = getSummaryMode();
+  const routeLabel = getUsageRouteLabel();
+  summaryTokensLabel.textContent = mode === 'last' ? t('responseTokens', routeLabel) : t('sessionTokens', routeLabel);
 }
 
 function restartAutoRefresh() {
@@ -279,18 +582,179 @@ function applyLogDir(logDir) {
   localStorage.setItem(LOG_DIR_STORAGE_KEY, logDir);
 }
 
+function getRelayFormSettings() {
+  return {
+    enabled: relayEnabledToggle.checked,
+    providerId: relayProviderIdInput.value.trim() || 'moapi',
+    baseUrl: relayBaseUrlInput.value.trim(),
+    apiKey: relayApiKeyInput.value.trim(),
+    testModel: relayTestModelInput.value.trim() || null
+  };
+}
+
+function setRelayFormSettings(settings) {
+  relayEnabledToggle.checked = Boolean(settings?.enabled);
+  relayProviderIdInput.value = settings?.providerId || 'moapi';
+  relayBaseUrlInput.value = settings?.baseUrl || '';
+  relayApiKeyInput.value = settings?.apiKey || '';
+  relayTestModelInput.value = settings?.testModel || '';
+  syncRelayEnabledState();
+}
+
+function syncRelayEnabledState() {
+  const enabled = relayEnabledToggle.checked;
+  relayProviderIdInput.disabled = !enabled;
+  relayBaseUrlInput.disabled = !enabled;
+  relayApiKeyInput.disabled = !enabled;
+  relayTestModelInput.disabled = !enabled;
+  relayRouteStatus.textContent = enabled ? relayBaseUrlInput.value.trim() || t('relayNotConfigured') : t('officialEndpoint');
+}
+
+function setRelayBusy(isBusy) {
+  [relayApplyBtn, relayRestartBtn, relayClearBtn].forEach((button) => {
+    button.disabled = isBusy;
+  });
+}
+
+function setRelayActionStatus(message, isError = false) {
+  relayActionStatus.textContent = message;
+  relayActionStatus.classList.toggle('is-error', isError);
+}
+
+function renderRelayStatus(status) {
+  currentRelayStatus = status || null;
+  relayStatusRoute.textContent = status?.route === 'relay' ? t('relay') : t('official');
+  relayStatusConfig.textContent = status?.configured ? t('configured') : t('notApplied');
+  relayStatusConfig.title = status?.configPath || '';
+  relayStatusCodex.textContent = status?.codexRunning ? t('running') : t('notRunning');
+  relayRouteStatus.textContent =
+    status?.route === 'relay' ? status?.baseUrl || t('relayActive') : t('officialEndpoint');
+  renderSummaryTokenLabel();
+}
+
+function updateRelayLastApply() {
+  const raw = localStorage.getItem(RELAY_LAST_APPLY_STORAGE_KEY);
+  relayLastApply.textContent = raw ? new Date(Number(raw)).toLocaleString('zh-CN') : '--';
+}
+
+function validateRelayForm(settings) {
+  if (!settings.enabled) {
+    throw new Error(t('relayDisabledError'));
+  }
+  if (!/^[A-Za-z0-9_-]+$/.test(settings.providerId)) {
+    throw new Error(t('invalidProviderIdError'));
+  }
+  if (!settings.baseUrl) {
+    throw new Error(t('emptyBaseUrlError'));
+  }
+  if (!/^https?:\/\//i.test(settings.baseUrl)) {
+    throw new Error(t('invalidBaseUrlError'));
+  }
+  if (!settings.apiKey) {
+    throw new Error(t('emptyApiKeyError'));
+  }
+}
+
+async function refreshRelayStatus() {
+  try {
+    const status = await invoke('relay_status');
+    renderRelayStatus(status);
+  } catch (error) {
+    setRelayActionStatus(String(error), true);
+  }
+}
+
+async function loadRelaySettings() {
+  try {
+    const settings = await invoke('load_relay_settings');
+    setRelayFormSettings(settings);
+    await refreshRelayStatus();
+    updateRelayLastApply();
+  } catch (error) {
+    setRelayActionStatus(String(error), true);
+  }
+}
+
+async function saveRelaySettings() {
+  const settings = getRelayFormSettings();
+  setRelayBusy(true);
+  setRelayActionStatus(t('saving'));
+  try {
+    const saved = await invoke('save_relay_settings', { settings });
+    setRelayFormSettings(saved);
+    setRelayActionStatus(t('relaySaved'));
+    await refreshRelayStatus();
+  } catch (error) {
+    setRelayActionStatus(String(error), true);
+  } finally {
+    setRelayBusy(false);
+  }
+}
+
+async function applyRelayConfig() {
+  const settings = getRelayFormSettings();
+  setRelayBusy(true);
+  setRelayActionStatus(t('applyingRelay'));
+  try {
+    validateRelayForm(settings);
+    const saved = await invoke('save_relay_settings', { settings });
+    setRelayFormSettings(saved);
+    const result = await invoke('apply_relay_config', { settings: saved });
+    localStorage.setItem(RELAY_LAST_APPLY_STORAGE_KEY, String(Date.now()));
+    updateRelayLastApply();
+    setRelayActionStatus(result.message || 'Relay configuration applied.');
+    await refreshRelayStatus();
+  } catch (error) {
+    setRelayActionStatus(String(error), true);
+  } finally {
+    setRelayBusy(false);
+  }
+}
+
+async function applyRelayConfigAndRestart() {
+  const settings = getRelayFormSettings();
+  setRelayBusy(true);
+  setRelayActionStatus(t('applyingRestart'));
+  try {
+    validateRelayForm(settings);
+    const result = await invoke('apply_relay_config_and_restart', { settings });
+    localStorage.setItem(RELAY_LAST_APPLY_STORAGE_KEY, String(Date.now()));
+    updateRelayLastApply();
+    setRelayActionStatus(`${result.apply.message} ${result.restart.message}`);
+    await loadRelaySettings();
+  } catch (error) {
+    setRelayActionStatus(String(error), true);
+  } finally {
+    setRelayBusy(false);
+  }
+}
+
+async function clearRelayConfig() {
+  setRelayBusy(true);
+  setRelayActionStatus(t('restoringOfficial'));
+  try {
+    const result = await invoke('clear_relay_config');
+    setRelayActionStatus(result.message || 'Official endpoint restored.');
+    await refreshRelayStatus();
+  } catch (error) {
+    setRelayActionStatus(String(error), true);
+  } finally {
+    setRelayBusy(false);
+  }
+}
+
 function isPrivacyModeEnabled() {
   return localStorage.getItem(PRIVACY_MODE_STORAGE_KEY) !== '0';
 }
 
 function maskPath(path) {
   if (!path) {
-    return 'Local Codex session logs';
+    return t('localLogs');
   }
 
   const segments = String(path).split(/[\\/]+/).filter(Boolean);
   if (segments.length <= 2) {
-    return 'Hidden path';
+    return t('hiddenPath');
   }
 
   const lastSegment = segments[segments.length - 1];
@@ -306,8 +770,8 @@ function renderSourcePath() {
   statusDetail.textContent = visibleText;
   statusDetail.title = privacyEnabled ? 'Privacy mode is on' : sourcePathRaw;
   privacyToggle.classList.toggle('is-private', privacyEnabled);
-  privacyToggle.setAttribute('aria-label', privacyEnabled ? 'Show full path' : 'Hide full path');
-  privacyToggle.title = privacyEnabled ? 'Show full path' : 'Hide full path';
+  privacyToggle.setAttribute('aria-label', privacyEnabled ? t('showFullPath') : t('hideFullPath'));
+  privacyToggle.title = privacyEnabled ? t('showFullPath') : t('hideFullPath');
 }
 
 function applyPrivacyMode(enabled) {
@@ -319,19 +783,19 @@ function setStatus(mode, label, detail) {
   statusBanner.classList.toggle('is-loading', mode === 'loading');
   statusBanner.classList.toggle('is-error', mode === 'error');
   statusBadge.textContent = label;
-  sourcePathRaw = detail || 'Local Codex session logs';
+  sourcePathRaw = detail || t('localLogs');
   renderSourcePath();
 }
 
 function resetSnapshotView() {
   primaryPercent.textContent = '--';
   secondaryPercent.textContent = '--';
-  primaryMeta.textContent = 'Resets --';
-  secondaryMeta.textContent = 'Resets --';
+  primaryMeta.textContent = `${t('resets')} --`;
+  secondaryMeta.textContent = `${t('resets')} --`;
   primaryMeterFill.style.width = '0%';
   secondaryMeterFill.style.width = '0%';
-  primaryRemaining.textContent = 'Remaining --';
-  secondaryRemaining.textContent = 'Remaining --';
+  primaryRemaining.textContent = `${t('remaining')} --`;
+  secondaryRemaining.textContent = `${t('remaining')} --`;
   totalTokens.textContent = '--';
   lastTokens.textContent = '--';
   contextWindow.textContent = '--';
@@ -344,8 +808,8 @@ function resetSnapshotView() {
   lastOutput.textContent = '--';
   lastCached.textContent = '--';
   lastReasoning.textContent = '--';
-  totalWindowLabel.textContent = 'Current session total';
-  lastWindowLabel.textContent = 'Most recent response';
+  totalWindowLabel.textContent = t('currentSessionTotal');
+  lastWindowLabel.textContent = t('mostRecentResponse');
   syncTime.textContent = '--';
   dailyBars.innerHTML = '';
   weeklyPath.setAttribute('d', '');
@@ -373,7 +837,7 @@ async function syncAutostartState() {
     autostartToggle.checked = await isAutostartEnabled();
   } catch (error) {
     autostartToggle.disabled = true;
-    sourceText.textContent = 'Source: local Codex session logs | autostart unavailable';
+    sourceText.textContent = `${t('sourcePrefix')}: ${t('localLogs')} | autostart unavailable`;
     console.error(error);
   }
 }
@@ -441,19 +905,21 @@ function renderSnapshot(snapshot) {
   const refreshLabel = formatTime(new Date());
   const eventLabel = formatRelativeTime(latestAt);
 
-  updatedAt.textContent = `Last refresh ${refreshLabel} | event ${eventLabel}`;
-  planText.textContent = `Plan ${formatPlanName(snapshot.plan_type)}`;
-  sourceText.textContent = `${snapshot.event_count} events from ${snapshot.scanned_files} files`;
-  setStatus('ready', 'Connected', snapshot.source_label);
+  updatedAt.textContent = t('lastRefresh', refreshLabel, eventLabel);
+  const routeLabel = getUsageRouteLabel();
+  const sourceDetail = getUsageSourceDetail(snapshot);
+  planText.textContent = `${routeLabel} | ${t('planPrefix')} ${formatPlanName(snapshot.plan_type)}`;
+  sourceText.textContent = t('tokensFromEvents', routeLabel, snapshot.event_count, snapshot.scanned_files);
+  setStatus('ready', routeLabel, sourceDetail);
 
   primaryPercent.textContent = `${primaryUsed}%`;
   secondaryPercent.textContent = `${secondaryUsed}%`;
-  primaryMeta.textContent = `Used ${primaryUsed}% | resets ${formatReset(snapshot.primary.resets_at)}`;
-  secondaryMeta.textContent = `Used ${secondaryUsed}% | resets ${formatReset(snapshot.secondary.resets_at)}`;
+  primaryMeta.textContent = `${t('used')} ${primaryUsed}% | ${t('resets')} ${formatReset(snapshot.primary.resets_at)}`;
+  secondaryMeta.textContent = `${t('used')} ${secondaryUsed}% | ${t('resets')} ${formatReset(snapshot.secondary.resets_at)}`;
   primaryMeterFill.style.width = `${primaryUsed}%`;
   secondaryMeterFill.style.width = `${secondaryUsed}%`;
-  primaryRemaining.textContent = `Remaining ${primaryRemainingPercent}% in this ${snapshot.primary.window_minutes / 60}h window`;
-  secondaryRemaining.textContent = `Remaining ${secondaryRemainingPercent}% this week`;
+  primaryRemaining.textContent = t('remainingWindow', primaryRemainingPercent, snapshot.primary.window_minutes / 60);
+  secondaryRemaining.textContent = t('remainingWeek', secondaryRemainingPercent);
   primaryReset.textContent = `5 hour window ${snapshot.primary.window_minutes / 60}h`;
   secondaryReset.textContent = formatReset(snapshot.secondary.resets_at);
 
@@ -469,9 +935,9 @@ function renderSnapshot(snapshot) {
   lastOutput.textContent = formatNumber(lastUsage?.output_tokens);
   lastCached.textContent = formatNumber(lastUsage?.cached_input_tokens);
   lastReasoning.textContent = formatNumber(lastUsage?.reasoning_output_tokens);
-  totalWindowLabel.textContent = totalUsage ? `Total ${formatNumber(totalUsage.total_tokens)}` : 'Current session total';
-  lastWindowLabel.textContent = lastUsage ? `Total ${formatNumber(lastUsage.total_tokens)}` : 'Most recent response';
-  syncTime.textContent = `${latestAt.toLocaleString('zh-CN', {
+  totalWindowLabel.textContent = totalUsage ? `${t('total')} ${formatNumber(totalUsage.total_tokens)}` : t('currentSessionTotal');
+  lastWindowLabel.textContent = lastUsage ? `${t('total')} ${formatNumber(lastUsage.total_tokens)}` : t('mostRecentResponse');
+  syncTime.textContent = `${latestAt.toLocaleString(currentLanguage === 'zh' ? 'zh-CN' : 'en-US', {
     month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
@@ -482,25 +948,26 @@ function renderSnapshot(snapshot) {
   weeklyPath.setAttribute('d', weeklyD);
   weeklyShadow.setAttribute('d', weeklyD);
 
-  updatedAt.title = `Source ${snapshot.source_label}\nLast usage event ${latestAt.toLocaleString('zh-CN')}`;
+  updatedAt.title = `${t('sourcePrefix')} ${sourceDetail}\n${t('lastUsageEvent')} ${latestAt.toLocaleString(currentLanguage === 'zh' ? 'zh-CN' : 'en-US')}`;
 }
 
 async function loadSnapshot() {
   try {
     refreshBtn.disabled = true;
-    setStatus('loading', 'Reading', getConfiguredLogDir() || 'Scanning ~/.codex/sessions');
-    updatedAt.textContent = 'Reading local usage logs...';
+    setStatus('loading', t('reading'), getConfiguredLogDir() || t('scanningLogs'));
+    updatedAt.textContent = t('readingLogs');
     const sessionsDir = getConfiguredLogDir();
     const snapshot = await invoke('load_usage_snapshot', {
       sessionsDir: sessionsDir || null
     });
+    await refreshRelayStatus();
     renderSnapshot(snapshot);
   } catch (error) {
     resetSnapshotView();
-    updatedAt.textContent = 'Read failed';
-    sourceText.textContent = `Read failed: ${String(error)}`;
-    planText.textContent = 'Plan --';
-    setStatus('error', 'Error', String(error));
+    updatedAt.textContent = t('readFailed');
+    sourceText.textContent = `${t('readFailed')}: ${String(error)}`;
+    planText.textContent = `${t('planPrefix')} --`;
+    setStatus('error', t('readFailed'), String(error));
     console.error(error);
   } finally {
     refreshBtn.disabled = false;
@@ -550,6 +1017,37 @@ summaryModeSelect.addEventListener('change', () => {
   loadSnapshot();
 });
 
+languageButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    applyLanguage(button.dataset.language);
+    loadSnapshot();
+  });
+});
+
+relayEnabledToggle.addEventListener('change', syncRelayEnabledState);
+
+relayProviderIdInput.addEventListener('input', syncRelayEnabledState);
+
+relayBaseUrlInput.addEventListener('input', syncRelayEnabledState);
+
+relayKeyVisibility.addEventListener('click', () => {
+  const isPassword = relayApiKeyInput.type === 'password';
+  relayApiKeyInput.type = isPassword ? 'text' : 'password';
+  relayKeyVisibility.textContent = isPassword ? t('hide') : t('show');
+});
+
+relayApplyBtn.addEventListener('click', () => {
+  applyRelayConfig();
+});
+
+relayRestartBtn.addEventListener('click', () => {
+  applyRelayConfigAndRestart();
+});
+
+relayClearBtn.addEventListener('click', () => {
+  clearRelayConfig();
+});
+
 autostartToggle.addEventListener('change', async (event) => {
   try {
     if (event.target.checked) {
@@ -579,12 +1077,14 @@ await appWindow.onMoved(() => {
   }, 60);
 });
 
+applyLanguage(getInitialLanguage());
 applyTheme(localStorage.getItem(THEME_STORAGE_KEY) === '1');
 applySnapPreference(localStorage.getItem(SNAP_STORAGE_KEY) !== '0');
 applyLogDir(getConfiguredLogDir());
 applySummaryMode(getSummaryMode());
 applyRefreshInterval(getRefreshIntervalMs());
 applyPrivacyMode(isPrivacyModeEnabled());
+await loadRelaySettings();
 const detailsExpanded = localStorage.getItem(DETAILS_STORAGE_KEY) === '1';
 applyDetailsPreference(detailsExpanded);
 await syncWindowHeight(detailsExpanded);

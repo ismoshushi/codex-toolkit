@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Codex Token Viewer",
+  "productName": "Codex Toolkit",
   "version": "1.0.0",
-  "identifier": "com.janrone.codextokenviewer",
+  "identifier": "com.janrone.codextoolkit",
   "build": {
     "frontendDist": "../src"
   },
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Codex Token Viewer",
+        "title": "Codex Toolkit",
         "width": 356,
         "height": 496,
         "minWidth": 356,

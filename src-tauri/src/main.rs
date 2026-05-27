@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 fn main() {
-    codex_token_viewer_lib::run();
+    codex_toolkit_lib::run();
 }

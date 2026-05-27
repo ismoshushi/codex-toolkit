@@ -1,14 +1,14 @@
 [package]
-name = "codex_token_viewer"
+name = "codex_toolkit"
 version = "1.0.0"
-description = "Codex Token Viewer desktop widget"
+description = "Codex Toolkit desktop utility"
 authors = ["janrone"]
 license = "MIT"
 edition = "2021"
 rust-version = "1.77.2"
 
 [lib]
-name = "codex_token_viewer_lib"
+name = "codex_toolkit_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
@@ -20,3 +20,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tauri = { version = "2.8.2", features = ["tray-icon", "macos-private-api"] }
 tauri-plugin-autostart = "2.5.1"
+toml_edit = "0.22"
+
+[dev-dependencies]
+tempfile = "3"

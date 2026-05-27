@@ -267,6 +267,8 @@ body.dark .status-banner.is-error .status-badge {
   right: 16px;
   left: 16px;
   z-index: 5;
+  max-height: calc(100% - 86px);
+  overflow: auto;
   border-radius: 16px;
   padding: 11px 12px;
   background: var(--surface);
@@ -317,6 +319,70 @@ body.dark .status-banner.is-error .status-badge {
   gap: 10px;
 }
 
+.api-switcher {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--block-bg);
+}
+
+.api-switcher-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.api-switcher strong,
+.api-switcher small {
+  display: block;
+}
+
+.api-switcher strong {
+  font-size: 12px;
+}
+
+.api-switcher small {
+  max-width: 140px;
+  margin-top: 2px;
+  color: var(--text-sub);
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.segmented-control {
+  flex-shrink: 0;
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--chip-bg);
+}
+
+.segment {
+  min-width: 58px;
+  border: 0;
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: transparent;
+  color: var(--text-sub);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.segment.is-active {
+  background: var(--blue);
+  color: #ffffff;
+}
+
 .text-input,
 .select-input {
   width: 100%;
@@ -336,10 +402,117 @@ body.dark .select-input {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.text-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
 .text-input:focus,
 .select-input:focus {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(62, 111, 247, 0.12);
+}
+
+.key-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+}
+
+.mini-btn,
+.relay-btn {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text-main);
+  background: var(--button-bg);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.mini-btn {
+  padding: 0 10px;
+}
+
+.relay-status-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--chip-bg);
+  font-size: 10px;
+}
+
+.relay-status-grid span {
+  color: var(--text-sub);
+}
+
+.relay-status-grid strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+}
+
+.relay-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+}
+
+.relay-btn {
+  min-height: 31px;
+  padding: 7px 8px;
+}
+
+.relay-btn-primary {
+  color: #ffffff;
+  border-color: transparent;
+  background: var(--blue);
+}
+
+.relay-btn-wide {
+  grid-column: 1 / -1;
+}
+
+.relay-btn-danger {
+  color: #c93333;
+}
+
+body.dark .relay-btn-danger {
+  color: #ff9a9a;
+}
+
+.mini-btn:hover,
+.relay-btn:hover {
+  border-color: var(--blue);
+  background: rgba(62, 111, 247, 0.1);
+}
+
+.relay-btn-primary:hover {
+  background: #2f5ddd;
+}
+
+.relay-btn:disabled,
+.mini-btn:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.relay-action-status {
+  display: block;
+  color: var(--text-sub);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.relay-action-status.is-error {
+  color: #c93333;
 }
 
 .settings-note {

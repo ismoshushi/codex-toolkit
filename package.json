@@ -1,7 +1,7 @@
 {
-  "name": "codex-token-viewer",
+  "name": "codex-toolkit",
   "version": "1.0.0",
-  "description": "A lightweight Tauri desktop app for viewing local Codex token usage, trends, and rate limit windows.",
+  "description": "A lightweight Codex desktop toolkit for usage monitoring, relay configuration, and app restart workflows.",
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build",
@@ -10,17 +10,19 @@
   "keywords": [
     "tauri",
     "desktop",
-    "widget"
+    "widget",
+    "codex",
+    "toolkit"
   ],
   "author": "janrone",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ismoshushi/codex-token-viewer.git"
+    "url": "git+https://github.com/ismoshushi/codex-toolkit.git"
   },
-  "homepage": "https://github.com/ismoshushi/codex-token-viewer",
+  "homepage": "https://github.com/ismoshushi/codex-toolkit",
   "bugs": {
-    "url": "https://github.com/ismoshushi/codex-token-viewer/issues"
+    "url": "https://github.com/ismoshushi/codex-toolkit/issues"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.8.0",
